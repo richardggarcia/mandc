@@ -1,25 +1,193 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "name": "MiedoandCodicia - Cripto News",
+  "short_name": "MiedoandCodicia",
+  "description": "App de noticias cripto con swipe - Desliza para descubrir las últimas noticias del mundo crypto",
+  "version": "1.0.0",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#f97316",
+  "background_color": "#18181b",
+  "lang": "es",
+  "dir": "ltr",
+  
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "logo192.png",
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
       "type": "image/png",
-      "sizes": "192x192"
+      "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
       "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Swipe de noticias cripto"
+    },
+    {
+      "src": "/screenshots/screenshot2.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Noticias guardadas"
+    }
+  ],
+  
+  "categories": [
+    "news",
+    "finance",
+    "productivity",
+    "business"
+  ],
+  
+  "shortcuts": [
+    {
+      "name": "Noticias nuevas",
+      "short_name": "Nuevas",
+      "description": "Ver las últimas noticias cripto",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/icons/shortcut-home.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Guardadas",
+      "short_name": "Guardadas",
+      "description": "Ver noticias guardadas",
+      "url": "/saved",
+      "icons": [
+        {
+          "src": "/icons/shortcut-saved.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  
+  "prefer_related_applications": false,
+  
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  
+  "protocol_handlers": [
+    {
+      "protocol": "web+crypto",
+      "url": "/?crypto=%s"
+    }
+  ],
+  
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  
+  "launch_handler": {
+    "client_mode": ["focus-existing", "auto"]
+  },
+  
+  "handle_links": "preferred",
+  
+  "file_handlers": [
+    {
+      "action": "/open-crypto-file",
+      "accept": {
+        "application/json": [".json"],
+        "text/csv": [".csv"]
+      },
+      "icons": [
+        {
+          "src": "/icons/file-handler.png",
+          "sizes": "96x96"
+        }
+      ],
+      "launch_type": "single-client"
+    }
+  ],
+  
+  "permissions": [
+    "background-sync",
+    "notifications",
+    "persistent-storage"
+  ],
+  
+  "serviceworker": {
+    "src": "/sw.js",
+    "scope": "/",
+    "type": "module",
+    "update_via_cache": "none"
+  },
+  
+  "splash_pages": null,
+  
+  "iarc_rating_id": "",
+  
+  "custom": {
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-title": "MiedoandCodicia",
+    "mobile-web-app-capable": "yes",
+    "msapplication-TileColor": "#f97316",
+    "msapplication-TileImage": "/icons/icon-144x144.png",
+    "msapplication-navbutton-color": "#f97316",
+    "msapplication-starturl": "/",
+    "application-name": "MiedoandCodicia",
+    "msapplication-tooltip": "App de noticias cripto con swipe"
+  }
 }
