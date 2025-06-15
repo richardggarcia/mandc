@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { newsAPI } from '../services/api';
+import apiService from '../services/api';
+
+const { newsAPI } = apiService;
 
 const useNews = (initialFilters = {}) => {
   // Estados principales
@@ -43,12 +45,18 @@ const useNews = (initialFilters = {}) => {
 
   // Función para cargar noticias
   const loadNews = useCallback(async (reset = false, customFilters = {}) => {
-    // Prevenir cargas duplicadas
-    if (loadingRef.current) return;
+    // Prevenir cargas duplicadas más estricto
+    if (loadingRef.current) {
+      console.log('🚫 Ya hay una carga en progreso');
+      return;
+    }
     
-    // Throttle: mínimo 1 segundo entre cargas
+    // Throttle más agresivo
     const now = Date.now();
-    if (now - lastLoadTime.current < 1000) return;
+    if (now - lastLoadTime.current < 2000) {
+      console.log('🚫 Throttle: esperando antes de siguiente carga');
+      return;
+    }
     
     try {
       setIsLoading(true);
@@ -61,46 +69,66 @@ const useNews = (initialFilters = {}) => {
       
       console.log(`🔄 Cargando noticias - Página: ${pageToLoad}`, mergedFilters);
       
-      const response = await newsAPI.getNews({
-        page: pageToLoad,
-        limit: 10,
-        ...mergedFilters
-      });
+      // Timeout más corto y mejor manejo
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos
+      
+      try {
+        const response = await newsAPI.getNews({
+          page: pageToLoad,
+          limit: 10,
+          ...mergedFilters,
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
 
-      if (response.success && response.data) {
-        const newNews = response.data.news || [];
-        const pagination = response.data.pagination || {};
-        
-        // Filtrar noticias ya rechazadas
-        const rejectedIds = new Set(rejectedNews.map(item => item.id));
-        const filteredNews = newNews.filter(item => !rejectedIds.has(item.id));
-        
-        if (reset) {
-          setNews(filteredNews);
-          setCurrentPage(2);
+        if (response.success && response.data) {
+          const newNews = response.data.news || [];
+          const pagination = response.data.pagination || {};
+          
+          // Filtrar noticias ya rechazadas
+          const rejectedIds = new Set(rejectedNews.map(item => item.id));
+          const filteredNews = newNews.filter(item => !rejectedIds.has(item.id));
+          
+          if (reset) {
+            setNews(filteredNews);
+            setCurrentPage(2);
+          } else {
+            setNews(prev => {
+              // Evitar duplicados
+              const existingIds = new Set(prev.map(item => item.id));
+              const uniqueNews = filteredNews.filter(item => !existingIds.has(item.id));
+              return [...prev, ...uniqueNews];
+            });
+            setCurrentPage(prev => prev + 1);
+          }
+          
+          setHasMore(pagination.hasNextPage || newNews.length === 10);
+          
+          console.log(`✅ Cargadas ${filteredNews.length} noticias nuevas`);
         } else {
-          setNews(prev => {
-            // Evitar duplicados
-            const existingIds = new Set(prev.map(item => item.id));
-            const uniqueNews = filteredNews.filter(item => !existingIds.has(item.id));
-            return [...prev, ...uniqueNews];
-          });
-          setCurrentPage(prev => prev + 1);
+          throw new Error(response.message || 'Error al cargar noticias');
         }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
         
-        setHasMore(pagination.hasNextPage || newNews.length === 10);
-        
-        console.log(`✅ Cargadas ${filteredNews.length} noticias nuevas`);
-      } else {
-        throw new Error(response.message || 'Error al cargar noticias');
+        if (fetchError.name === 'AbortError') {
+          throw new Error('Conexión muy lenta - usando modo offline');
+        }
+        throw fetchError;
       }
+      
     } catch (err) {
       console.error('❌ Error cargando noticias:', err);
-      setError(err.message || 'Error al cargar noticias');
       
-      // En caso de error, intentar cargar noticias mock
+      // Usar noticias mock inmediatamente si hay problemas de conexión
       if (news.length === 0) {
+        console.log('📱 Usando noticias de demostración por problemas de conexión');
         setNews(getMockNews());
+        setError('Modo offline - Usando noticias de demostración');
+      } else {
+        setError('Error de conexión - Verifica tu internet');
       }
     } finally {
       setIsLoading(false);
@@ -243,10 +271,18 @@ const useNews = (initialFilters = {}) => {
     loadNews(true);
   }, [loadNews]);
 
-  // Cargar noticias iniciales
+  // Cargar noticias iniciales - TEMPORALMENTE SOLO MOCK
   useEffect(() => {
-    loadNews(true);
-  }, []); // Solo una vez al montar
+    // TEMPORALMENTE: Solo usar datos mock para evitar timeouts
+    console.log('📱 Cargando datos de demostración (modo desarrollo)');
+    setNews(getMockNews());
+    setError(null);
+    setIsLoading(false);
+    
+    // TODO: Descomentar cuando la API esté funcionando
+    // loadNews(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo una vez al montar - loadNews se recrea en cada render
 
   // Estadísticas
   const stats = {

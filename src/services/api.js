@@ -338,22 +338,25 @@ export const handleNetworkError = (error) => {
 };
 
 // Función helper para retry de requests
-export const retryRequest = async (requestFn, maxRetries = 3, delay = 1000) => {
+export const retryRequest = async (requestFn, maxRetries = 3, initialDelay = 1000) => {
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await requestFn();
     } catch (error) {
       if (i === maxRetries - 1) throw error;
       
-      console.log(`Retry ${i + 1}/${maxRetries} after ${delay}ms`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      delay *= 2; // Exponential backoff
+      // Calcular delay directamente sin usar variable en closure
+      const currentDelay = initialDelay * Math.pow(2, i);
+      console.log(`Retry ${i + 1}/${maxRetries} after ${currentDelay}ms`);
+      
+      // Usar el delay calculado directamente
+      await new Promise(resolve => setTimeout(resolve, currentDelay));
     }
   }
 };
 
 // Export por defecto con todas las APIs
-export default {
+const apiService = {
   news: newsAPI,
   analytics: analyticsAPI,
   utils: utilsAPI,
@@ -363,3 +366,5 @@ export default {
     retryRequest
   }
 };
+
+export default apiService;
